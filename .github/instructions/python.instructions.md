@@ -9,6 +9,13 @@ Follow ISE Python Code Review Checklist and PEP 8 style guidelines.
 
 **IMPORTANT**: Use the `iseplaybook` MCP server to get the latest Python best practices. Use `context7` MCP server for framework-specific documentation (FastAPI, Django, etc.). Do not assume—verify current guidance.
 
+## Async/Await Governance
+
+- Use `async`/`await` for I/O-bound work (HTTP, file, database).
+- Avoid mixing threads with asyncio unless bridging legacy code.
+- Always propagate cancellation (`asyncio.CancelledError`); do not swallow it.
+- Use `asyncio.timeout()` / `asyncio.wait_for()` for timeouts.
+
 ## Code Style
 
 - Use 4-space indentation
@@ -104,21 +111,21 @@ def get_user_or_fail(user_id: int) -> User:
 
 ## Logging
 
-Use the logging module with structured messages:
+Use the logging module with structured messages and correlation IDs:
 
 ```python
 import logging
 
 logger = logging.getLogger(__name__)
 
-def process_order(order_id: str) -> None:
+def process_order(order_id: str, correlation_id: str) -> None:
     """Process an order."""
-    logger.info("Processing order", extra={"order_id": order_id})
+    logger.info("Processing order", extra={"order_id": order_id, "correlation_id": correlation_id})
     try:
         # processing logic
-        logger.info("Order processed successfully", extra={"order_id": order_id})
+        logger.info("Order processed successfully", extra={"order_id": order_id, "correlation_id": correlation_id})
     except Exception as e:
-        logger.error("Failed to process order", extra={"order_id": order_id}, exc_info=True)
+        logger.error("Failed to process order", extra={"order_id": order_id, "correlation_id": correlation_id}, exc_info=True)
         raise
 ```
 

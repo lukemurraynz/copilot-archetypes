@@ -7,6 +7,14 @@ description: 'PowerShell cmdlet and scripting best practices based on Microsoft 
 
 This guide provides PowerShell-specific instructions to help GitHub Copilot generate idiomatic, safe, and maintainable scripts. It aligns with Microsoft's PowerShell cmdlet development guidelines.
 
+**IMPORTANT**: Use the `iseplaybook` MCP server for automation best practices and the `microsoft-learn` MCP server for Azure/PowerShell guidance when version- or platform-dependent behavior is involved.
+
+## Safe Automation Defaults
+
+- Support **dry-run** mode and require an explicit `-Apply`/`-Write`/`-Update` switch for mutations.
+- Calculate and display changes before executing them.
+- Avoid prompts for secrets; accept via environment or managed identity.
+
 ## Naming Conventions
 
 ### Cmdlet Names
@@ -139,6 +147,7 @@ function Set-ResourceConfiguration {
 - Avoid `Write-Host` for data output
 - Enable downstream cmdlet processing
 - Use `Write-Output` explicitly when needed
+- Emit structured objects suitable for CSV/JSON export; avoid `Write-Host` as the only output
 
 ### Pipeline Streaming
 

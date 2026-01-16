@@ -25,6 +25,9 @@ Follow ISE JavaScript/TypeScript Code Review Checklist and modern JavaScript bes
 - Define explicit types for function parameters and return values
 - Use interfaces for object shapes, types for unions/primitives
 - Avoid `any` - use `unknown` if type is truly unknown
+- Prefer discriminated unions for state modeling (e.g., `loading | error | success`)
+- Add explicit return types on exported functions
+- Use `readonly` for immutable data structures
 
 ```typescript
 // ✅ Good
@@ -89,6 +92,8 @@ const UserCard: React.FC<UserCardProps> = ({ user, onSelect }) => {
 - Use `useEffect` with proper dependency arrays
 - Create custom hooks for reusable logic
 - Use `useMemo` and `useCallback` for performance optimization
+- Treat `exhaustive-deps` warnings as correctness bugs; fix dependencies instead of disabling
+- Stabilize props passed to memoized components to avoid render storms
 
 ```tsx
 const useUser = (id: string) => {

@@ -121,6 +121,12 @@ var subset = items[1..4];
 public record UserDto(string Name, string Email);
 ```
 
+## Immutability and Records
+
+- Prefer **records** for DTOs, commands, and event messages to leverage value equality and safe cloning.
+- Use **classes** for domain entities/aggregates requiring identity-based equality.
+- Avoid mutable fields in records; use `with` for updates.
+
 ## Async Programming Best Practices
 
 General guidance:
@@ -169,6 +175,10 @@ using (_logger.BeginScope("UserId: {UserId}", userId))
     _logger.LogInformation("Processing started");
 }
 ```
+
+- Use `IHttpClientFactory` and the platform resilience handlers where available; otherwise apply bounded retries + timeouts per operation.
+- Emit ProblemDetails-style errors for APIs; include stable error codes.
+- Propagate correlation IDs across boundaries (HTTP headers, logs).
 
 ## Performance Considerations
 
@@ -297,4 +307,4 @@ dotnet-coverage collect -f cobertura -o coverage.cobertura.xml dotnet test
 
 - Use `iseplaybook` MCP server for ISE C# best practices
 - Use `context7` MCP server for .NET API documentation
-- Use `microsoftdocs` MCP server for official .NET guidance
+- Use `microsoft-learn` MCP server for official .NET guidance

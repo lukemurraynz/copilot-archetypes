@@ -9,6 +9,30 @@ Use this skill when developing Drasi ContinuousQuery definitions with Cypher.
 
 **IMPORTANT**: Use the `context7` MCP server with library ID `/drasi-project/docs` to get the latest Drasi documentation and Cypher syntax. Do not assume—verify current supported features.
 
+**Verify-first** any Drasi capability or function behavior that may be version-dependent:
+
+```text
+[VERIFY]
+EvidenceType = Docs | ReleaseNotes | Issue | Repro
+WhereToCheck = <URL, repo, command, or repro steps>
+```
+
+## Drasi Function Guidance (Select the Right Tool)
+
+- **State transitions**: use `drasi.previousDistinctValue()` for changes like `pending → active`.
+- **Simple deltas**: use `drasi.previousValue()` for comparisons against the last value.
+- **Change timestamps**: use `drasi.changeDateTime()` for windowing and recency checks.
+- **Absence detection**: use `drasi.trueFor()` / `drasi.trueLater()` when supported. [VERIFY]
+- **Historical lookup**: use `drasi.getVersionByTimestamp()` or `drasi.getVersionsByTimeRange()` when a temporal index is enabled. [VERIFY]
+
+## Query Performance & Reliability Guardrails
+
+- Avoid Cartesian joins (`MATCH (a), (b)`) unless absolutely required; they scale poorly.
+- Filter early with `WHERE` before aggregations to reduce per-diff work.
+- Prefer indexed properties in Source data where possible; query cost is driven by change volume + aggregation.
+- Reactions are **at-least-once**: design consumers to be idempotent and safe on duplicates.
+- Document a replay plan when queries drive external side effects (e.g., Service Bus/webhooks).
+
 ## Supported Cypher Features (Safe to Use)
 
 | Feature                         | Example                                                          |
@@ -87,7 +111,12 @@ MATCH (w:`my-event-hub`)
 
 ## Deployment Commands
 
-Always use Drasi CLI, NOT kubectl:
+Always use Drasi CLI, NOT kubectl. Deploy in this order and verify each step:
+
+1. Source
+2. Namespace (if used)
+3. ContinuousQuery
+4. Reaction
 
 ````bash
 drasi apply -f queries.yaml -n drasi-system

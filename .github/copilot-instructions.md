@@ -23,14 +23,23 @@ If two instruction files disagree, follow the one that is **more specific to the
 | MCP Server | Use For |
 |------------|---------|
 | `iseplaybook` | ISE Engineering Playbook best practices (code reviews, testing, CI/CD, security) |
-| `microsoftdocs` | Official Microsoft/Azure documentation |
-| `api-guidelines-docs` | Microsoft REST API Guidelines |
+| `microsoft-learn` | Official Microsoft/Azure documentation and API guidelines |
 | `context7` | Framework and library documentation (React, .NET, Azure SDKs, Drasi and everything else not covered by other MCP Servers) |
 
 **Example usage:**
 - "Use `iseplaybook` MCP server to get the latest code review checklist"
 - "Use `context7` to get the latest React hooks documentation"
-- "Use `microsoftdocs` to find Microsoft Azure documentation and Patterns and Practices"
+- "Use `microsoft-learn` to find Microsoft Azure documentation and Patterns and Practices"
+
+## Verify-First Standard
+
+If a claim depends on SDK/framework/platform version behavior, **mark it** and provide a verification path:
+
+```text
+[VERIFY]
+EvidenceType = Docs | ReleaseNotes | Issue | Repro
+WhereToCheck = <URL, repo, command, or repro steps>
+```
 
 ## How Copilot and Coding Agents Should Behave
 
@@ -85,7 +94,7 @@ For code reviews, CI/CD, security, observability, and documentation, follow the 
 
 ## REST API Design
 
-Use `api-guidelines-docs` MCP server to get the latest Microsoft REST API Guidelines.
+Use `microsoft-learn` MCP server to get the latest Microsoft REST API Guidelines.
 
 For API development, follow these patterns:
 
@@ -175,9 +184,8 @@ Consult the instruction files in `.github/instructions/` for language-specific g
 
 ### MCP Servers for Latest Guidance
 - Use `iseplaybook` MCP server for ISE Engineering Playbook
-- Use `api-guidelines-docs` MCP server for REST API guidelines
+- Use `microsoft-learn` MCP server for REST API guidelines and Microsoft/Azure documentation
 - Use `context7` MCP server for framework documentation
-- Use `microsoftdocs` MCP server for Microsoft/Azure documentation
 
 ### Additional Resources
 - [ISE Code-With Engineering Playbook](https://microsoft.github.io/code-with-engineering-playbook/)

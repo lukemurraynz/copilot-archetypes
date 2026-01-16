@@ -157,7 +157,8 @@ ENTRYPOINT ["dotnet", "MyApp.dll"]
 - **Guidance for Copilot:**
     - Prefer Alpine variants for Linux-based images due to their small size (e.g., `alpine`, `node:18-alpine`).
     - Use official language-specific images (e.g., `python:3.9-slim-buster`, `openjdk:17-jre-slim`).
-    - Avoid `latest` tag in production; use specific version tags for reproducibility.
+- Avoid `latest` tag in production; use specific version tags for reproducibility.
+- Pin base images explicitly and review upgrade notes before bumping.
     - Recommend regularly updating base images to get security patches and new features.
 - **Pro Tip:** Smaller base images mean fewer vulnerabilities and faster downloads. Always start with the smallest image that meets your needs.
 
@@ -307,9 +308,10 @@ COPY config/ ./config/
     - **Permission Management:** Ensure the non-root user has the necessary permissions to run the application.
 - **Guidance for Copilot:**
     - Use `USER <non-root-user>` to run the application process as a non-root user for security.
-    - Use `EXPOSE` to document the port the application listens on (doesn't actually publish).
-    - Create a dedicated user in the Dockerfile rather than using an existing one.
-    - Ensure proper file permissions for the non-root user.
+- Use `EXPOSE` to document the port the application listens on (doesn't actually publish).
+- Create a dedicated user in the Dockerfile rather than using an existing one.
+- Ensure proper file permissions for the non-root user.
+- Avoid privileged containers and `docker.sock` mounts in production.
 
 #### Secure User Setup
 
@@ -354,8 +356,9 @@ CMD ["node", "dist/main.js"]
 - **Guidance for Copilot:**
     - Avoid hardcoding configuration inside the image. Use `ENV` for default values, but allow overriding at runtime.
     - Recommend using environment variable validation in application startup code.
-    - Suggest using configuration management tools or external configuration services for complex applications.
-    - Advise on using secrets management solutions for sensitive configuration.
+- Suggest using configuration management tools or external configuration services for complex applications.
+- Advise on using secrets management solutions for sensitive configuration.
+- If running on AKS with Workload Identity, ensure apps support `AZURE_FEDERATED_TOKEN_FILE`.
 
 #### Environment Variable Best Practices
 

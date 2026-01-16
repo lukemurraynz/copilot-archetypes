@@ -94,6 +94,7 @@ If no AVM module exists for a resource type, use native Bicep resource declarati
 - ✅ **Declare** parameters at top of file with `@sys.description()` decorators
 - ✅ **Specify** `@minLength()` and `@maxLength()` for naming parameters
 - ✅ **Use** `@allowed()` decorator sparingly to avoid blocking valid deployments
+- ✅ **Use** union types for environment selectors (e.g., `'dev' | 'staging' | 'prod'`) when supported
 - ✅ **Set** default values safe for test environments (low-cost SKUs)
 - ✅ **Use** variables for complex expressions instead of embedding in resource properties
 - ✅ **Leverage** `loadJsonContent()` for external configuration files
@@ -121,6 +122,7 @@ If no AVM module exists for a resource type, use native Bicep resource declarati
 - ❌ **Never** include secrets or keys in outputs
 - ✅ **Use** resource properties directly in outputs (e.g., `storageAccount.outputs.primaryBlobEndpoint`)
 - ✅ **Enable** managed identities where possible
+- ✅ **Tier diagnostics**: Baseline (default) vs Investigation (time-boxed) — never enable all categories by default
 - ✅ **Disable** public access when network isolation is enabled
 
 ### Types
@@ -161,7 +163,7 @@ az bicep build --file main.bicep
 
 - **Schema Information**: Use `azure_get_schema_for_Bicep` for resource schemas
 - **Deployment Guidance**: Use `azure_get_deployment_best_practices` tool
-- **Service Documentation**: Use `microsoft.docs.mcp` for Azure service-specific guidance
+- **Service Documentation**: Use `microsoft-learn` MCP server for Azure service-specific guidance
 
 ### GitHub Copilot Integration
 

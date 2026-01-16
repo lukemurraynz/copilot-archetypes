@@ -7,13 +7,13 @@ description: 'Terraform Infrastructure as Code best practices following ISE Engi
 
 Follow HashiCorp best practices and ISE Terraform guidelines.
 
-**IMPORTANT**: Always use the `iseplaybook` and `microsoftdocs` MCP servers to get the latest best practices and documentation. Do not assume—verify current guidance before implementing.
+**IMPORTANT**: Always use the `iseplaybook` and `microsoft-learn` MCP servers to get the latest best practices and documentation. Do not assume—verify current guidance before implementing.
 
 ## Azure Verified Modules (PREFERRED)
 
 **ALWAYS prefer Azure Verified Modules (AVM)** over writing custom Terraform modules from scratch.
 
-Use the `microsoftdocs` MCP server to search for the latest Azure Verified Modules:
+Use the `microsoft-learn` MCP server to search for the latest Azure Verified Modules:
 - Search: `Azure Verified Modules Terraform <resource-type>`
 
 ### What are Azure Verified Modules?
@@ -83,7 +83,7 @@ resource "azurerm_storage_account" "main" {
 
 #### Finding AVM Modules
 
-1. Use `microsoftdocs` MCP server to search for modules
+1. Use `microsoft-learn` MCP server to search for modules
 2. Check [Terraform Registry for Azure Verified Modules](https://registry.terraform.io/namespaces/Azure)
 3. Module naming pattern: `Azure/avm-{type}-{service}-{resource}/azurerm`
 
@@ -376,6 +376,17 @@ terraform {
 }
 ```
 
+## Workspace & Environment Isolation
+
+- Use one workspace per environment boundary (e.g., `dev-api`, `staging-dataops`, `prod-ml`).
+- Always select the workspace explicitly in CLI/CI (`terraform workspace select <env>`).
+- Document rollback and drift recovery steps per workspace.
+
+## Diagnostics Tiering
+
+- Baseline diagnostics enabled by default; Investigation tier is time-boxed and off by default.
+- Never enable all diagnostic categories globally.
+
 ## Outputs
 
 ```hcl
@@ -516,7 +527,7 @@ terraform validate
 ### Use Available Tools
 
 - **Deployment Guidance**: Use `azure_get_deployment_best_practices` tool (if available)
-- **Service Documentation**: Use `microsoftdocs` MCP server for Azure service-specific guidance
+- **Service Documentation**: Use `microsoft-learn` MCP server for Azure service-specific guidance
 - **Schema Information**: Use `azure_get_schema_for_Bicep` for Bicep resources (if available)
 
 ### GitHub Copilot Integration
@@ -559,7 +570,7 @@ Before submitting any AVM-related code:
 
 ## References
 
-- Use `microsoftdocs` MCP server for latest Azure and Terraform documentation
+- Use `microsoft-learn` MCP server for latest Azure and Terraform documentation
 - Use `iseplaybook` MCP server for ISE best practices
 - [Azure Verified Modules Documentation](https://azure.github.io/Azure-Verified-Modules/)
 - [Azure Verified Modules (Terraform Registry)](https://registry.terraform.io/namespaces/Azure)
