@@ -4,7 +4,7 @@ This directory contains templates for creating new GitHub Copilot customisation 
 
 ## Available Templates
 
-### `instruction.template.md`
+### `instructions.template.md`
 Template for creating new language or framework instruction files.
 
 **Use when:** Adding standards for a new programming language or framework
@@ -55,7 +55,7 @@ Template for creating new custom agents.
 
 ```bash
 # 1. Copy template
-cp .github/templates/instruction.template.md .github/instructions/rust.instructions.md
+cp .github/templates/instructions.template.md .github/instructions/rust.instructions.md
 
 # 2. Edit the file
 # - Replace {Language} with "Rust"

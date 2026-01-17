@@ -64,7 +64,7 @@ function isUser(obj: unknown): obj is User {
 
 ### Functional Components
 
-Use functional components with hooks (no class components):
+Use functional components with hooks (no class components). Prefer explicit props typing over `React.FC` unless you need its implicit `children` typing:
 
 ```tsx
 interface UserCardProps {
@@ -72,7 +72,7 @@ interface UserCardProps {
   onSelect?: (id: string) => void;
 }
 
-const UserCard: React.FC<UserCardProps> = ({ user, onSelect }) => {
+const UserCard = ({ user, onSelect }: UserCardProps) => {
   const handleClick = () => {
     onSelect?.(user.id);
   };

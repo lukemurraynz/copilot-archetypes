@@ -29,7 +29,7 @@ Azure Verified Modules are Microsoft-maintained, well-tested Terraform modules t
 
 ### Critical: AVM PR Validation Requirements
 
-**IMPORTANT**: When GitHub Copilot Agent or GitHub Copilot Coding Agent is working on this repository, the following local unit tests MUST be executed to comply with PR checks. Failure to run these tests will cause PR validation failures:
+**IMPORTANT**: When working in AVM repositories, the following local unit tests MUST be executed to comply with PR checks. Failure to run these tests will cause PR validation failures:
 
 ```bash
 ./avm pre-commit

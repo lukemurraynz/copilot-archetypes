@@ -5,7 +5,7 @@ description: Guide for writing Drasi continuous queries using Cypher. Use this w
 
 # Drasi Query Development Skill
 
-Use this skill when developing Drasi ContinuousQuery definitions with Cypher.
+Use this skill when developing Drasi ContinuousQuery definitions with Cypher. If the user is not working with Drasi, do not apply this skill.
 
 **IMPORTANT**: Use the `context7` MCP server with library ID `/drasi-project/docs` to get the latest Drasi documentation and Cypher syntax. Do not assume—verify current supported features.
 

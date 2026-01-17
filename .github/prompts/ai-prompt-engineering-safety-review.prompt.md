@@ -89,6 +89,8 @@ Analyze the provided prompt using systematic evaluation frameworks and provide d
 
 ## Output Format
 
+If a section is not applicable to the prompt, omit it rather than filling placeholders.
+
 Provide your analysis in the following structured format:
 
 ### 🔍 **Prompt Analysis Report**

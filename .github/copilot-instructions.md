@@ -18,18 +18,22 @@ If two instruction files disagree, follow the one that is **more specific to the
 
 ## Using MCP Servers for Latest Information
 
-**IMPORTANT**: Always use MCP servers to get the latest best practices and documentation. Do not assume—verify current guidance. Prefer using these servers instead of relying solely on internal training data.
+**IMPORTANT**: Use MCP servers to verify version-dependent guidance and current best practices. Do not assume—verify. Prefer MCP sources over internal training data.
 
 | MCP Server | Use For |
 |------------|---------|
 | `iseplaybook` | ISE Engineering Playbook best practices (code reviews, testing, CI/CD, security) |
 | `microsoft-learn` | Official Microsoft/Azure documentation and API guidelines |
-| `context7` | Framework and library documentation (React, .NET, Azure SDKs, Drasi and everything else not covered by other MCP Servers) |
+| *(optional, if configured)* `context7` | Framework/library docs not covered by other MCP servers |
 
 **Example usage:**
 - "Use `iseplaybook` MCP server to get the latest code review checklist"
-- "Use `context7` to get the latest React hooks documentation"
-- "Use `microsoft-learn` to find Microsoft Azure documentation and Patterns and Practices"
+- "Use `microsoft-learn` to find Microsoft Azure documentation and patterns"
+- "If available, use `context7` for framework-specific documentation"
+
+### Tool Naming Reference
+
+Use the actual MCP tool prefixes available in this repo/runtime (for example: `microsoft-learn/*`, `iseplaybook/*`). Avoid inventing tool names.
 
 ## Verify-First Standard
 
@@ -55,7 +59,7 @@ This section describes **behavioral expectations** for Copilot and Coding Agents
 
 - Before editing code, search the workspace for relevant files, patterns, and existing implementations.
 - Always check for applicable instruction files (global + language-specific) and follow them.
-- When documentation is referenced by URL, use the appropriate MCP server to fetch authoritative content instead of guessing.
+- When documentation is referenced by URL, use the appropriate MCP server to fetch authoritative content instead of guessing. Links in this file are starting points; prefer MCP-fetched sources for current details.
 
 ### Change Strategy
 
@@ -98,10 +102,10 @@ Use `microsoft-learn` MCP server to get the latest Microsoft REST API Guidelines
 
 For API development, follow these patterns:
 
-- **URL Structure**: Use consistent, hierarchical paths (`/api/v1/resources/{id}`)
+- **URL Structure**: Use consistent, hierarchical paths (`/api/resources/{id}`)
 - **HTTP Methods**: Use appropriate verbs (GET, POST, PUT, PATCH, DELETE)
 - **Status Codes**: Return correct codes (200, 201, 204, 400, 404, 500)
-- **Versioning**: Include version in URL path (`/api/v1/`)
+- **Versioning**: Follow current guidelines (path, header, or query). Do not hardcode a strategy without verification.
 - **Error Responses**: Use structured error responses with problem details
 - **Collections**: Apply consistent pagination, filtering, and sorting
 
@@ -178,14 +182,14 @@ Consult the instruction files in `.github/instructions/` for language-specific g
 3. **Code Simplicity**: Prefer readability over cleverness
 4. **Consistency**: Follow existing patterns in the codebase
 5. **Documentation**: Keep documentation current with code changes
-6. **MCP Servers**: Always use MCP servers for latest guidance—don't assume
+6. **MCP Servers**: Use MCP servers for latest guidance when claims are version-dependent
 
 ## Resources & References
 
 ### MCP Servers for Latest Guidance
 - Use `iseplaybook` MCP server for ISE Engineering Playbook
 - Use `microsoft-learn` MCP server for REST API guidelines and Microsoft/Azure documentation
-- Use `context7` MCP server for framework documentation
+- Use `context7` MCP server if it is configured for framework documentation
 
 ### Additional Resources
 - [ISE Code-With Engineering Playbook](https://microsoft.github.io/code-with-engineering-playbook/)

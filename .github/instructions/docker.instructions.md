@@ -155,8 +155,8 @@ ENTRYPOINT ["dotnet", "MyApp.dll"]
     - **Security Updates:** Choose base images that receive regular security updates and have a clear update policy.
     - **Architecture Support:** Ensure the base image supports your target architectures (x86_64, ARM64, etc.).
 - **Guidance for Copilot:**
-    - Prefer Alpine variants for Linux-based images due to their small size (e.g., `alpine`, `node:18-alpine`).
-    - Use official language-specific images (e.g., `python:3.9-slim-buster`, `openjdk:17-jre-slim`).
+    - Prefer Alpine variants when compatible; otherwise choose slim or distroless for glibc-dependent apps.
+    - Use official language-specific images (e.g., `python:3.12-slim`, `openjdk:17-jre-slim`).
 - Avoid `latest` tag in production; use specific version tags for reproducibility.
 - Pin base images explicitly and review upgrade notes before bumping.
     - Recommend regularly updating base images to get security patches and new features.

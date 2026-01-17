@@ -14,7 +14,7 @@ Follow ISE Python Code Review Checklist and PEP 8 style guidelines.
 - Use `async`/`await` for I/O-bound work (HTTP, file, database).
 - Avoid mixing threads with asyncio unless bridging legacy code.
 - Always propagate cancellation (`asyncio.CancelledError`); do not swallow it.
-- Use `asyncio.timeout()` / `asyncio.wait_for()` for timeouts.
+- Use `asyncio.timeout()` (Python 3.11+) or `asyncio.wait_for()` for timeouts based on project version.
 
 ## Code Style
 
