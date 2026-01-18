@@ -1,6 +1,6 @@
 ---
 applyTo: "**/*.py"
-description: 'Python development best practices following ISE Engineering Playbook guidelines'
+description: "Python development best practices following ISE Engineering Playbook guidelines"
 ---
 
 # Python Code Instructions
@@ -9,12 +9,25 @@ Follow ISE Python Code Review Checklist and PEP 8 style guidelines.
 
 **IMPORTANT**: Use the `iseplaybook` MCP server to get the latest Python best practices. Use `context7` MCP server for framework-specific documentation (FastAPI, Django, etc.). Do not assume—verify current guidance.
 
+**Purpose and scope**: applies to all Python-based services and scripts owned by the ISE organization. For framework-specific deviations (FastAPI, Django, Flask), consult the `context7` MCP server for current overrides.
+
 ## Async/Await Governance
 
 - Use `async`/`await` for I/O-bound work (HTTP, file, database).
 - Avoid mixing threads with asyncio unless bridging legacy code.
 - Always propagate cancellation (`asyncio.CancelledError`); do not swallow it.
 - Use `asyncio.timeout()` (Python 3.11+) or `asyncio.wait_for()` for timeouts based on project version.
+- Use `async with` for async context management (connection pools, sessions, transactions).
+- Prefer structured task groups (Python 3.11+):
+
+```python
+import asyncio
+
+async with asyncio.TaskGroup() as tg:
+    tg.create_task(fetch_user(user_id))
+```
+
+- When integrating libraries that mix sync/async, consider `anyio` for compatibility.
 
 ## Code Style
 
@@ -28,7 +41,13 @@ Follow ISE Python Code Review Checklist and PEP 8 style guidelines.
 
 Use type hints for function signatures and complex variables:
 
+- Prefer `from __future__ import annotations` for Python >= 3.9 targets.
+- Use `TypedDict` or `@dataclass` instead of `Dict[str, Any]` for predictable contracts.
+- Add `pytest-mypy` (or equivalent) to ensure annotated tests pass type consistency checks.
+
 ```python
+from __future__ import annotations
+
 from typing import Optional, List, Dict, Any
 
 def get_user(user_id: int) -> Optional[User]:
@@ -43,6 +62,10 @@ def process_items(items: List[str]) -> Dict[str, Any]:
 ## Docstrings
 
 Use Google-style docstrings:
+
+- Add module-level docstrings for public modules (e.g., `main.py`, `config.py`).
+- Use example-based docstrings (`>>>`) only for exposed library functions; avoid for internal modules.
+- Optional: use `pdoc` or `sphinx-autodoc` for generated documentation aligned to this format.
 
 ```python
 def calculate_discount(price: float, discount_percent: float) -> float:
@@ -107,6 +130,9 @@ def get_user_or_fail(user_id: int) -> User:
     if user is None:
         raise UserNotFoundError(f"User {user_id} not found")
     return user
+
+- Prefer exception chaining to preserve root cause (`raise CustomError(...) from e`).
+- Add graceful degradation or retry logic for transient errors (async HTTP/DB calls).
 ```
 
 ## Logging
@@ -128,6 +154,9 @@ def process_order(order_id: str, correlation_id: str) -> None:
         logger.error("Failed to process order", extra={"order_id": order_id, "correlation_id": correlation_id}, exc_info=True)
         raise
 ```
+
+- Standardize logging context keys (e.g., `component`, `correlation_id`) and centralize them via helper or `logging.Filter`.
+- For larger services, prefer OpenTelemetry context propagation for correlation.
 
 ## Async/Await
 
@@ -185,6 +214,11 @@ class TestUserService:
         assert service.get_user(999) is None
 ```
 
+- Use `pytest-asyncio` for async test patterns.
+- Naming: `test_*.py` and `test_*` functions; avoid `*_test.py`.
+- Enforce coverage in CI (`pytest --cov`, baseline >= 90%).
+- Consider property-based testing with `hypothesis` for data-processing modules.
+
 ## Project Structure
 
 ```text
@@ -193,10 +227,13 @@ src/
   ├── main.py           # Application entry point
   ├── config.py         # Configuration management
   ├── models/           # Data models
+  ├── schemas/          # Pydantic/OpenAPI schemas
   ├── services/         # Business logic
   ├── repositories/     # Data access
   ├── api/              # API endpoints
-  └── utils/            # Utility functions
+  ├── utils/            # Utility functions
+  └── cli/              # CLI entry points / scripts
+py.typed                # Package typing marker (when publishing)
 tests/
   ├── __init__.py
   ├── conftest.py       # pytest fixtures
@@ -209,10 +246,13 @@ tests/
 Use these tools for code quality:
 
 - **Black**: Code formatting
-- **Flake8**: Linting
+- **Ruff**: Fast linting (can replace or supplement Flake8)
+- **Flake8**: Linting (if not using Ruff as primary)
 - **isort**: Import sorting
 - **mypy**: Type checking
 - **pytest**: Testing
+- **bandit**: Static security scanning
+- **pre-commit**: Local hooks for black/isort/mypy/ruff
 
 ```toml
 # pyproject.toml
@@ -224,7 +264,19 @@ profile = "black"
 
 [tool.mypy]
 strict = true
+
+[tool.ruff]
+line-length = 88
+select = ["E", "F", "I", "UP", "B"]
+ignore = ["B008"]
 ```
+
+- Run lint/type/test tools in CI (GitHub Actions or Azure DevOps templates).
+
+## Governance and MCP Integration
+
+- Refresh MCP guidance before merging to `main` to avoid drift.
+- For CI, consider version-locking MCP recommendations in a checked-in artifact to keep reviews stable.
 
 ## References
 

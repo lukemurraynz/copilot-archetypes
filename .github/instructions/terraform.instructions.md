@@ -29,12 +29,18 @@ Azure Verified Modules are Microsoft-maintained, well-tested Terraform modules t
 
 ### Critical: AVM PR Validation Requirements
 
-**IMPORTANT**: When working in AVM repositories, the following local unit tests MUST be executed to comply with PR checks. Failure to run these tests will cause PR validation failures:
+**IMPORTANT**: When working in AVM repositories, the following local unit tests MUST be executed to comply with PR checks. Failure to run these tests will cause PR validation failures. AVM testing also includes additional tools (avmfix, terraform-docs, Conftest/OPA, custom TFLint rules) that run centrally in GitHub workflows; treat the commands below as the **minimum local checks**, and always review PR CI results for the full test matrix:
 
 ```bash
 ./avm pre-commit
 ./avm tflint
 ./avm pr-check
+```
+
+For AVM contributors and module authors, **SHOULD** run module unit tests via:
+
+```bash
+./avm unit-test
 ```
 
 These commands must be run before any pull request is created or updated to ensure compliance with the Azure Verified Modules standards and prevent CI/CD pipeline failures.
@@ -197,6 +203,8 @@ terraform/
           ├── variables.tf
           └── outputs.tf
 ```
+
+Align with the ISE Terraform structure guidelines: https://raw.githubusercontent.com/microsoft/code-with-engineering-playbook/main/docs/CI-CD/recipes/terraform/terraform-structure-guidelines.md
 
 ## Variables
 
@@ -376,16 +384,21 @@ terraform {
 }
 ```
 
+- Ensure the backend storage account uses encryption at rest (Azure Storage defaults) and strict access control (RBAC; private endpoints where appropriate).
+- Separate state per environment **and** per critical boundary (e.g., landing zones vs app stacks); avoid shared state across unrelated domains.
+
 ## Workspace & Environment Isolation
 
 - Use one workspace per environment boundary (e.g., `dev-api`, `staging-dataops`, `prod-ml`).
 - Always select the workspace explicitly in CLI/CI (`terraform workspace select <env>`).
 - Document rollback and drift recovery steps per workspace.
+- Never mix environments in a single workspace/state file; document workspace naming conventions (e.g., `prod-core`, `nonprod-data`).
 
 ## Diagnostics Tiering
 
-- Baseline diagnostics enabled by default; Investigation tier is time-boxed and off by default.
+- Define **Baseline** vs **Investigation** tiers explicitly (Baseline = default-on for required signals; Investigation = time-boxed, opt-in) and align with AVM solution-development guidance.
 - Never enable all diagnostic categories globally.
+- Scope diagnostic categories per resource type and environment to control cost and noise.
 
 ## Outputs
 
@@ -454,7 +467,7 @@ resource "azurerm_storage_account" "accounts" {
 
 ## Testing
 
-Use Terratest for infrastructure testing:
+Use **stack-level tests** (root modules) with Terratest or `terraform test`:
 
 ```go
 func TestTerraformStorage(t *testing.T) {
@@ -473,7 +486,31 @@ func TestTerraformStorage(t *testing.T) {
 }
 ```
 
+For **module-level tests** in AVM repositories, run `./avm unit-test` (terraform test) as part of contributor validation.
+
 ## Best Practices
+
+### Platform Ownership & Governance
+
+- Define clear ownership boundaries per platform layer (landing zones, shared services, app teams). Each layer owns its state, modules, and change approvals.
+- Use a **blueprint repository** as the source of truth for baseline platform stacks. Sync changes into environment repos via **automated PRs** with review gates.
+- Implement drift governance: schedule drift detection, alert on unauthorized changes, and require remediation PRs (no manual fixes outside Terraform).
+
+### Declarative Maps & Lookup Patterns
+
+- Prefer **smart lookup maps** in `locals` to avoid deeply nested conditionals (e.g., region SKU, environment sizing, naming rules).
+- Model access as **declarative permission maps** (role → principals) and generate assignments from data, not ad-hoc resources.
+
+### Versioning & Pipeline Workflow
+
+- Define a **versioning policy** for modules and stacks (SemVer for shared modules; environment stacks pinned to exact versions).
+- Use a **pipeline workflow** that enforces: format → validate → plan → policy checks (OPA/Conftest or equivalent) → apply with manual approval for prod.
+- Require **upgrade PRs** for module/provider changes; include changelog links and impact summary.
+
+### Onboarding, tfvars Validation, & Catalog Index
+
+- Validate onboarding inputs (`.tfvars`) with schema checks and pre-commit validation (required keys, allowed values, naming rules).
+- Maintain a **catalog index** that maps environments, subscriptions, regions, and owners to their Terraform stacks for discoverability.
 
 ### AVM Module Usage
 
@@ -481,8 +518,12 @@ func TestTerraformStorage(t *testing.T) {
 - ✅ **Start** with official examples from module documentation
 - ✅ **Review** all inputs and outputs before implementation
 - ✅ **Enable** telemetry: `enable_telemetry = true`
+- ✅ **Opt-out only when required**: set `enable_telemetry = false` after privacy/compliance review and document the rationale
 - ✅ **Use** AVM utility modules for common patterns
 - ✅ **Follow** AzureRM provider requirements and constraints
+- ✅ **Prefer AVM** when available; only build custom modules when no AVM module exists or when wrapping AVM in a composite pattern module
+- ✅ **Compose thin wrappers** around AVM modules to encode platform standards (avoid recreating resource configuration)
+- ✅ **Use a private module registry** (Terraform Cloud/Enterprise or internal registry) for internal wrapper modules
 
 ### Code Quality
 
@@ -529,6 +570,7 @@ terraform validate
 - **Deployment Guidance**: Use `azure_get_deployment_best_practices` tool (if available)
 - **Service Documentation**: Use `microsoft-learn` MCP server for Azure service-specific guidance
 - **Schema Information**: Use `azure_get_schema_for_Bicep` for Bicep resources (if available)
+- **AVM Versioning**: Verify AVM module versions and deprecation notes in the AVM docs or Terraform Registry before scaffolding
 
 ### GitHub Copilot Integration
 
@@ -551,6 +593,7 @@ When working with AVM repositories:
 ### Support Resources
 
 - **AVM Documentation**: `https://azure.github.io/Azure-Verified-Modules/`
+- **AVM Solution Development**: `https://azure.github.io/Azure-Verified-Modules/avm/solutions/terraform/`
 - **GitHub Issues**: Report issues in the specific module's GitHub repository
 - **Community**: Azure Terraform Provider GitHub discussions
 

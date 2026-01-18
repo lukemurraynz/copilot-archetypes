@@ -1,11 +1,18 @@
 # Organization-wide GitHub Copilot Guidelines
 
-This document defines how GitHub Copilot and Coding Agents should operate across all projects, and how they should consume the engineering standards defined in `.github/instructions/*.md`, following industry best practices from the Microsoft ISE (Industry Solutions Engineering) Code-With Engineering Playbook.
+This document defines how Copilot/Agents should operate across all projects, and how they should consume the engineering standards defined in `.github/instructions/*.md`, following industry best practices from the Microsoft ISE (Industry Solutions Engineering) Code-With Engineering Playbook.
 
 ## Instruction Hierarchy and Scope
 
-- **Audience**: GitHub Copilot and Coding Agents (and humans who want to understand how they are configured).
-- **Purpose**: Describe *how* Copilot and Agents should work with this repository and where to find the canonical engineering standards.
+- **Audience**: Copilot/Agents (and humans who want to understand how they are configured).
+- **Purpose**: Describe *how* Copilot/Agents should work with this repository and where to find the canonical engineering standards.
+
+### Roles and Scope Clarity
+
+| Category | Applies To | Description |
+|----------|------------|-------------|
+| Copilot/Agents | AI-assisted coding tools | Behavioral and operational safeguards for AI-assisted work |
+| Human Contributors | Engineers and reviewers | Collaboration, review, and team practices |
 
 When interpreting instructions, always resolve conflicts by preferring the most specific rule that applies:
 
@@ -45,9 +52,9 @@ EvidenceType = Docs | ReleaseNotes | Issue | Repro
 WhereToCheck = <URL, repo, command, or repro steps>
 ```
 
-## How Copilot and Coding Agents Should Behave
+## How Copilot/Agents Should Behave
 
-This section describes **behavioral expectations** for Copilot and Coding Agents when working in this repository. For detailed engineering standards (testing, security, documentation, etc.), **defer to** `.github/instructions/global.instructions.md` and the relevant language-specific instruction file.
+This section describes **behavioral expectations** for Copilot/Agents when working in this repository. For detailed engineering standards (testing, security, documentation, etc.), **defer to** `.github/instructions/global.instructions.md` and the relevant language-specific instruction file.
 
 ### Planning and Task Management
 
@@ -60,18 +67,27 @@ This section describes **behavioral expectations** for Copilot and Coding Agents
 - Before editing code, search the workspace for relevant files, patterns, and existing implementations.
 - Always check for applicable instruction files (global + language-specific) and follow them.
 - When documentation is referenced by URL, use the appropriate MCP server to fetch authoritative content instead of guessing. Links in this file are starting points; prefer MCP-fetched sources for current details.
+- Prefer minimal context: read only the files necessary to complete the task and avoid unrelated modules to reduce unintended side effects.
+- In large repos, search for existing patterns before creating new handlers/controllers/services to maintain consistency.
 
 ### Change Strategy
 
 - Prefer smallest-change diffs—modify only what is necessary to satisfy the request.
 - Avoid broad refactors unless required for correctness or explicitly requested.
-- Keep PRs and patches conceptually small and focused.
+- Keep Pull Requests (PRs) and patches conceptually small and focused.
 
 ### Testing and Validation
 
 - When modifying runnable code, update or add tests as needed to cover the new behavior.
 - Where practical, run relevant tests after changes and surface failures (and likely causes) in the response.
 - Follow the testing guidance defined in `.github/instructions/global.instructions.md` (testing pyramid, fast deterministic tests, etc.).
+
+### TDD Workflow (Agent Default)
+1. Write failing tests first (TDD mode)
+2. Commit tests: `test: add coverage for <feature> [AGENT-#123]`
+3. Implement minimal code to pass tests
+4. Refactor only after green tests + 100% coverage
+5. Never modify committed tests during implementation phase
 
 ### Documentation
 
@@ -154,12 +170,16 @@ Follow [Conventional Commits](https://www.conventionalcommits.org/):
 - Ask questions when requirements are unclear
 - Explain the "why" behind suggestions
 
-### Pull Request Standards
+### Pull Request (PR) Standards
 - Create clear, focused PRs with descriptive titles
 - Include acceptance criteria and testing notes
 - Keep PRs small (< 400 lines when possible)
 - Provide context for reviewers in the description
 - Link related issues
+
+## Escalation Path for Ambiguities
+
+When Copilot cannot verify correctness after checking MCP sources and local files, tag the response as `[UNCERTAIN]` and defer to a human engineer. Provide the exact question(s) or missing inputs needed to proceed safely.
 
 ## Language-Specific Guidelines
 
@@ -200,3 +220,15 @@ Consult the instruction files in `.github/instructions/` for language-specific g
 ---
 
 **Note**: This file provides high-level guidance. For detailed, language-specific standards, always consult the appropriate instruction files in `.github/instructions/`. When in doubt, use MCP servers to verify current best practices.
+
+## Quick Reference Cheat Sheet
+
+**Always**
+- Verify version-dependent claims using MCP sources before assuming details.
+- Prefer the smallest safe change that satisfies the request.
+- Follow the most specific applicable instruction file.
+
+**Never**
+- Surface secrets, tokens, credentials, or inferred configurations.
+- Apply external changes without explicit approval.
+- Hallucinate unverified behavior or versions.

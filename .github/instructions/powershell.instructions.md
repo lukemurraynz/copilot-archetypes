@@ -14,6 +14,22 @@ This guide provides PowerShell-specific instructions to help GitHub Copilot gene
 - Support **dry-run** mode and require an explicit `-Apply`/`-Write`/`-Update` switch for mutations.
 - Calculate and display changes before executing them.
 - Avoid prompts for secrets; accept via environment or managed identity.
+- Never assume default subscriptions or tenants; require explicit parameters or context selection.
+
+### Execution Safety
+
+- Do not mutate without an explicit intent flag (`-Apply`, `-Write`, `-Update`).
+- Compute and display a change plan before execution.
+- Provide a read-only or `-WhatIf`/`-DryRun` mode in scripts that can mutate state.
+
+### Change Workflow
+
+- Discover → Measure → Recommend → Compare (Current vs Optimal) → Flag `changeRequired` → Apply only if explicitly requested.
+
+### Data-Driven Rules
+
+- Put business rules (pricing, thresholds, tiers, policy mappings) in hashtables/objects near the top of the script.
+- Avoid hard-coded if/else decision trees; make calculations explainable/inspectable.
 
 ## Naming Conventions
 
@@ -148,6 +164,7 @@ function Set-ResourceConfiguration {
 - Enable downstream cmdlet processing
 - Use `Write-Output` explicitly when needed
 - Emit structured objects suitable for CSV/JSON export; avoid `Write-Host` as the only output
+- Include FinOps outputs when applicable (cost deltas, savings potential, SKU recommendations)
 
 ### Pipeline Streaming
 
@@ -311,6 +328,8 @@ function Get-ResourceData {
 - In advanced functions with `[CmdletBinding()]`, prefer `$PSCmdlet.WriteError()` over `Write-Error`
 - In advanced functions with `[CmdletBinding()]`, prefer `$PSCmdlet.ThrowTerminatingError()` over `throw`
 - Construct proper `ErrorRecord` objects with category, target, and exception details
+- Wrap external calls in `try`/`catch` and continue processing other subscriptions/resources
+- Collect failures in a final summary object for pipeline/CI reporting
 
 ### Non-Interactive Design
 
@@ -319,6 +338,7 @@ function Get-ResourceData {
 - Support automation scenarios
 - Document all required inputs
 - Use `-Force` switch to bypass confirmations in automation
+- Never prompt for secrets; use managed identity or environment variables
 
 ### Fail Fast
 
@@ -588,6 +608,25 @@ Include comment-based help for any public-facing function or cmdlet. Inside the 
 8. **Output Design**: Return objects, not formatted text; use `-PassThru` for action cmdlets
 9. **Verbose Support**: Provide verbose output for operational details
 10. **Non-Interactive**: Design for automation; avoid `Read-Host`
+
+## Control Plane vs Data Plane
+
+- Use Az cmdlets for data plane discovery (metrics, inventory, resource properties).
+- Use ARM REST via `Invoke-RestMethod` when SDKs/cmdlets lag or are incomplete.
+- Acquire tokens from the current Az context; never use manual auth in scripts.
+
+## CI/CD Integration
+
+- Must run non-interactively in GitHub Actions and Azure DevOps.
+- Emit outputs via `$GITHUB_OUTPUT` (GitHub) or `##vso[task.setvariable]` (ADO).
+- Do not require interactive login in pipelines.
+
+## ARM Batch Support
+
+- Provide helper functions like `New-ArmBatchRequest` and `Invoke-ArmBatch` for bulk ARM calls.
+- Batch size must be configurable (default 10–20).
+- Validate each inner `httpStatusCode` and capture failures per item.
+- No destructive operations without an explicit intent flag (`-Apply`/`-Update`/`-Write`).
 
 ## Full Example: End-to-End Cmdlet Pattern
 
