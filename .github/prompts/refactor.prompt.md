@@ -1,7 +1,7 @@
 ---
-mode: agent
+agent: agent
 description: Suggest refactoring improvements for code
-tools: [ "search", "edit", "iseplaybook/*", "context7/*"]
+tools: [ "search", "iseplaybook/*", "context7/*"]
 ---
 
 Please analyze the code I'm about to share and suggest refactoring improvements.

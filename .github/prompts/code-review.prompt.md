@@ -1,5 +1,5 @@
 ---
-mode: agent
+agent: agent
 description: Request a thorough code review of changes
 tools: [ "search", "iseplaybook/*", "context7/*"]
 ---
@@ -15,6 +15,8 @@ Focus on:
 3. **Performance** - Are there obvious performance issues?
 4. **Maintainability** - Is the code readable and well-structured?
 5. **Testing** - Is test coverage adequate?
+
+Limit feedback to the most important issues: prioritize by severity and provide at most 10 items total.
 
 For each issue found, please:
 - Explain what the problem is

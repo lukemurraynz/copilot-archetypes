@@ -5,13 +5,14 @@ description: Archetype-agnostic global development standards and Copilot guidanc
 
 # Global Development Standards (Archetype‑Agnostic)
 
-These are organization-wide rules that apply to every repository and project, regardless of language, framework, or archetype. Language- or tool-specific files may add details and can override sections explicitly for their scope. GitHub Copilot and Coding Agents are configured via `.github/copilot-instructions.md`, which describes **how** they should apply these standards when working in this repository.
+These are organization-wide rules that apply to every repository and project, regardless of language, framework, or archetype. Language- or tool-specific files may add details and can override sections explicitly for their scope. Copilot/Agents are configured via `.github/copilot-instructions.md`, which describes **how** they should apply these standards when working in this repository.
 
 ## Scope and Precedence
 
 - Applies to all files in the repository unless a more specific instruction file overrides it (for example, Python/Java/Terraform instruction files).
 - When guidance conflicts, prefer the most specific rule applicable to the file or technology in question.
 - Keep changes minimal and focused; avoid broad refactors unless requested or strictly necessary.
+- Operational behaviors for Copilot/Agents live in `.github/copilot-instructions.md`; this file defines engineering standards.
 
 ## Core Principles
 
@@ -30,7 +31,7 @@ Before you consider a task complete, ensure:
 3. Documentation updated (README, comments/docstrings, ADRs if design decisions changed)
 4. Security and privacy concerns reviewed (no secrets; validated inputs; least-privileged access)
 5. Lint/format/type checks pass locally and in CI
-6. Commit message concise and descriptive; PR includes context, acceptance criteria, and risk notes
+6. Commit message concise and descriptive; human-authored PRs include context, acceptance criteria, and risk notes
 
 ## Testing Standards
 
@@ -42,6 +43,7 @@ Before you consider a task complete, ensure:
 	- One edge/boundary case
 	- One failure/exception path
 - Strive for incremental coverage improvement; do not reduce existing coverage without justification
+- For TDD expectations, follow the workflow defined in `.github/copilot-instructions.md`
 
 ## Documentation Standards
 
@@ -65,6 +67,7 @@ Before you consider a task complete, ensure:
 - Prefer widely-used, actively maintained libraries
 - Remove unused dependencies; avoid transitive bloat
 - Keep builds cacheable; fail fast on lint/type errors
+- Maintain supply-chain hygiene: prefer lockfiles and/or provenance/signing where supported
 
 ## Version Control and PR Hygiene
 
@@ -85,27 +88,15 @@ Before you consider a task complete, ensure:
 - Write inclusive language in code, docs, and UI strings
 - Ensure docs and examples are accessible (headings, links, contrast in images)
 
-## Links to Organization Standards (Full URLs)
-
-These resources provide additional, technology-specific guidance. Always use the full GitHub URLs when linking in docs or instruction files.
-
-- Organization Copilot Guidelines:
-	https://github.com/lukemurraynz/copilot-archetype-standards/tree/master/.github/instructions/global.instructions.md
-
-- Python Instructions:
-	https://github.com/lukemurraynz/copilot-archetype-standards/tree/master/.github/instructions/python.instructions.md
-
-- Java Instructions:
-	https://github.com/lukemurraynz/copilot-archetype-standards/tree/master/.github/instructions/java.instructions.md
-
-## Working with GitHub Copilot and Agents
+## Working with Copilot/Agents
 
 - Leverage repository prompts and agents when available for planning, security review, and test generation.
-- For detailed Copilot and Coding Agent behavior (instruction hierarchy, MCP usage, task planning), see `.github/copilot-instructions.md`.
+- For detailed Copilot/Agents behavior (instruction hierarchy, MCP usage, task planning), see `.github/copilot-instructions.md`.
 - Reference prompt and agent files using the full URLs above when embedding links in Markdown.
 - Prefer minimal, targeted suggestions; validate generated code (human- or tool-authored) with tests and linters.
+- Use minimal context: read only files needed to complete the task, and reuse existing patterns before creating new ones.
+- If verification fails, mark the response as `[UNCERTAIN]` and defer to human review.
 
 ---
 
 By following these global standards, teams maintain consistency across repositories while still allowing language- and framework-specific instruction files to tailor the details where appropriate.
-

@@ -1,6 +1,6 @@
+---
 description: Brief description of the agent's purpose and approach
-tools: ['search', 'usages', 'githubRepo']
-model: Claude Sonnet 4.5
+tools: ["search", "github", "iseplaybook/*", "context7/*", "microsoft-learn/*"]
 ---
 
 # {Mode} ({Language/Scope})
@@ -43,11 +43,11 @@ How this agent uses the available tools:
 - Purpose 1
 - Purpose 2
 
-**`usages` for:**
+**`iseplaybook/*` for:**
 - Purpose 1
 - Purpose 2
 
-**`githubRepo` for:**
+**`microsoft-learn/*` for:**
 - Purpose 1
 - Purpose 2
 

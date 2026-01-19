@@ -1,7 +1,7 @@
 ---
-mode: 'agent'
+agent: 'agent'
 description: Clear one-line description of what this prompt does
-tools: ['search', 'usages', 'githubRepo']
+tools: ["search", "iseplaybook/*", "context7/*", "microsoft-learn/*"]
 ---
 
 # {Purpose} Agent
@@ -23,12 +23,12 @@ When you request {action}, I will:
 - Specific search use case 2
 - Specific search use case 3
 
-**Using `usages` to:**
+**Using `iseplaybook/*` to:**
 - Specific usage analysis case 1
 - Specific usage analysis case 2
 - Specific usage analysis case 3
 
-**Using `githubRepo` to:**
+**Using `microsoft-learn/*` to:**
 - Specific repository analysis case 1
 - Specific repository analysis case 2
 - Specific repository analysis case 3

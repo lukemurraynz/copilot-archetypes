@@ -1,7 +1,7 @@
 ---
 description: "Comprehensive AI prompt engineering safety review and improvement prompt. Analyzes prompts for safety, bias, security vulnerabilities, and effectiveness while providing detailed improvement recommendations with extensive frameworks, multi-turn attack analysis, scorer evaluation metrics, testing methodologies, and educational content based on Microsoft PyRIT research."
-mode: 'agent'
-tools: ['search', 'Learn MCP/*', 'context7/*', 'iseplaybook/*']
+agent: 'agent'
+tools: ["search", "microsoft-learn/*", "context7/*", "iseplaybook/*" ]
 ---
 
 # AI Prompt Engineering Safety Review & Improvement
@@ -88,6 +88,8 @@ Analyze the provided prompt using systematic evaluation frameworks and provide d
 - **Model Failure Recovery:** Can the prompt recover from partial or failed model responses?
 
 ## Output Format
+
+If a section is not applicable to the prompt, omit it rather than filling placeholders.
 
 Provide your analysis in the following structured format:
 

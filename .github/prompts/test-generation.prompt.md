@@ -1,7 +1,7 @@
 ---
-mode: agent
+agent: agent
 description: Generate tests for existing code
-tools: ['edit', 'search', 'runCommands', 'runTasks', 'context7/*', 'iseplaybook/*']
+tools: ["search", "context7/*", "iseplaybook/*"]
 ---
 
 Please generate tests for the code I'm about to share.

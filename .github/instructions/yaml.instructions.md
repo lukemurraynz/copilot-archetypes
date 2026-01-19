@@ -7,7 +7,7 @@ description: 'YAML and CI/CD pipeline best practices and guidelines'
 
 Follow ISE CI/CD Best Practices for pipeline development.
 
-**IMPORTANT**: Use the `iseplaybook` MCP server to get the latest CI/CD best practices. Use `microsoftdocs` MCP server for Azure Pipelines documentation. Do not assume—verify current guidance.
+**IMPORTANT**: Use the `iseplaybook` MCP server to get the latest CI/CD best practices. Use `microsoft-learn` MCP server for Azure Pipelines documentation. Do not assume—verify current guidance.
 
 ## When to Apply
 
