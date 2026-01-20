@@ -1,305 +1,401 @@
 ---
 applyTo: "**/*.md,**/docs/**"
-description: 'Documentation and Markdown best practices following ISE Engineering Playbook guidelines'
+description: "Documentation and Markdown best practices aligned with the Industry Solutions Engineering Playbook, Microsoft Writing Style Guide, and built-in humanization guardrails"
 ---
 
 # Documentation and Markdown Instructions
 
+Write documentation that is clear, specific, and written by a human for other humans.  
+Technical accuracy is mandatory. Readability, clarity, and tone are equally mandatory.
+
+This instruction set aligns with:
+- Microsoft ISE (Industry Solutions Engineering) Engineering Playbook
+- Microsoft Writing Style Guide
+- Explicit anti-AI and humanization rules
+
+---
 
 ## When to Apply
 
-This instruction applies when:
-- Creating or modifying Markdown files
+Apply these instructions when:
+- Creating or editing Markdown files
 - Writing README files
-- Creating technical documentation
-- Writing decision records (ADRs)
+- Producing technical documentation
+- Writing Architecture Decision Records (ADRs)
+- Editing documentation generated or assisted by an LLM
+
+---
+
+## Core Principles (Non-Negotiable)
+
+1. Clarity over cleverness  
+   Say what something is and does. Avoid inflated or abstract language.
+
+2. Specific beats impressive  
+   Prefer concrete details over general claims.
+
+3. Neutral, not promotional  
+   Documentation explains behavior. It does not market solutions.
+
+4. Human voice is allowed  
+   First person is acceptable when it improves clarity or honesty.
+
+5. No AI fingerprints  
+   If a sentence sounds like a press release, rewrite it.
+
+---
+
+## Microsoft Writing Style Alignment (Mandatory)
+
+All documentation must follow these Microsoft Writing Style Guide principles:
+
+- Use short, simple sentences.
+- Use sentence case for headings and labels.
+- Prefer active voice.
+- Use imperative verbs in procedures.
+- Write in a conversational, natural tone.
+- Be concise and remove filler words.
+- Avoid idioms, slang, and cultural references.
+- Use the Oxford (serial) comma in lists.
+- Use bias-free and inclusive language.
+- Avoid punctuation at the end of headings.
+
+If Microsoft guidance conflicts with stylistic preference, Microsoft guidance wins.
+
+---
 
 ## README Structure
 
-A good README should include:
+Use this as a baseline, not a rigid template.
 
-```markdown
-# Project Name
+    # Project name
 
-Brief description of what the project does.
+    One or two plain sentences explaining what the project does.
 
-## Features
+    ## Why this exists
 
-- Feature 1
-- Feature 2
-- Feature 3
+    Brief context. What problem it solves and for whom.
 
-## Prerequisites
+    ## Features
 
-- Requirement 1
-- Requirement 2
+    - Concrete capabilities only
+    - Avoid aspirational or promotional language
 
-## Installation
+    ## Prerequisites
 
-Step-by-step installation instructions.
+    - Explicit versions and requirements
 
-## Usage
+    ## Installation
 
-Basic usage examples with code snippets.
+    Step-by-step instructions that actually work.
 
-## Configuration
+    ## Usage
 
-Configuration options and environment variables.
+    Minimal, copy-paste-ready examples.
 
-## Contributing
+    ## Configuration
 
-Link to CONTRIBUTING.md or brief contribution guidelines.
+    Key options, defaults, and trade-offs.
 
-## License
+    ## Contributing
 
-License information.
-```
+    How to contribute and where to start.
 
-## Markdown Formatting
+    ## License
+
+    License information.
+
+Avoid:
+- “This project aims to…”
+- “A powerful, flexible, and scalable solution…”
+- “It's a game-changer…”
+- Generic “Future improvements” sections
+
+---
+
+## Markdown Formatting Standards
 
 ### Headings
 
-Use proper heading hierarchy:
+- Use sentence case
+- One H1 per document
+- No punctuation at the end of headings
 
-```markdown
-# Title (H1 - one per document)
+Example:
 
-## Major Section (H2)
+    # Project overview
 
-### Subsection (H3)
+    ## How authentication works
 
-#### Detail Section (H4)
-```
+    ### Token validation flow
 
-### Code Blocks
+---
 
-Use fenced code blocks with language specification:
+### Code Examples
 
-```markdown
-```python
-def hello():
-    return "Hello, World!"
-```
+- Examples must compile or run
+- Prefer minimal examples over completeness
 
-```bash
-npm install
-npm run build
-```
-```
+Example:
+
+    def hello():
+        return "Hello, world"
+
+    npm install
+    npm run build
+
+---
 
 ### Lists
 
-```markdown
-Unordered lists:
-- Item 1
-- Item 2
-  - Nested item
-  - Another nested item
+Use lists for facts, not filler.
 
-Ordered lists:
-1. First step
-2. Second step
-3. Third step
+Example:
 
-Task lists:
-- [x] Completed task
-- [ ] Pending task
-```
+    - Supports OAuth2 token validation
+    - Caches tokens for five minutes
+    - Logs failed authentication attempts
 
-### Links and References
+Avoid forcing ideas into groups of three unless necessary.
 
-```markdown
-# Inline links
-[Link text](https://example.com)
+---
 
-# Reference links
-[Link text][reference]
-[reference]: https://example.com
+### Links
 
-# Relative links (preferred for repo files)
-[Contributing Guide](../../CONTRIBUTING.md)
-[Documentation](../../README.md)
+- Use descriptive link text
+- Prefer relative links inside repositories
 
-# Anchor links
-[Jump to section](#section-heading)
-```
+Example:
+
+    [Deployment guide](../guides/deployment.md)
+
+Avoid:
+- “Click here”
+- Bare URLs in prose
+
+---
 
 ### Tables
 
-```markdown
-| Column 1 | Column 2 | Column 3 |
-|----------|----------|----------|
-| Data 1   | Data 2   | Data 3   |
-| Data 4   | Data 5   | Data 6   |
+Use tables only when comparison matters.
 
-# Alignment
-| Left | Center | Right |
-|:-----|:------:|------:|
-| L    | C      | R     |
-```
+Example:
+
+    | Option  | Default | Notes                      |
+    |--------|---------|----------------------------|
+    | timeout| 30s     | Increase for slow networks |
+
+---
 
 ### Images
 
-```markdown
-# Basic image
-![Alt text](images/diagram.png)
+- Images must add information
+- Always include meaningful alt text
 
-# With title
-![Alt text](images/diagram.png "Image title")
+Example:
 
-# Reference style
-![Alt text][image-ref]
-[image-ref]: images/diagram.png
-```
+    ![Request flow between API and worker](images/request-flow.png)
+
+---
 
 ## Technical Documentation
 
 ### API Documentation
 
-```markdown
-## API Reference
+Focus on behavior, not ceremony.
 
-### GET /api/users/{id}
+Example:
 
-Retrieves a user by ID.
+    ## GET /api/users/{id}
 
-**Parameters:**
+    Returns a user record by ID.
 
-| Name | Type   | Required | Description        |
-|------|--------|----------|---------------------|
-| id   | string | Yes      | The user identifier |
+    ### Parameters
 
-**Response:**
+    | Name | Type   | Required | Description     |
+    |------|--------|----------|-----------------|
+    | id   | string | Yes      | User identifier |
 
-```json
-{
-  "id": "123",
-  "name": "John Doe",
-  "email": "john@example.com"
-}
-```
+    ### Response
 
-**Status Codes:**
+    {
+      "id": "123",
+      "name": "Jane Doe"
+    }
 
-| Code | Description           |
-|------|-----------------------|
-| 200  | Success               |
-| 404  | User not found        |
-| 500  | Internal server error |
-```
+    ### Errors
 
-### Decision Records (ADR)
+    | Code | When it happens       |
+    |------|-----------------------|
+    | 404  | User does not exist   |
+    | 500  | Database unavailable |
 
-```markdown
-# ADR-001: Use PostgreSQL for User Data
+Avoid:
+- “Plays a crucial role”
+- “Ensures a seamless experience”
 
-## Status
+---
 
-Accepted
+## Architecture Decision Records (ADR)
 
-## Context
+ADRs must be factual and honest.
 
-We need a database for storing user data with complex relationships.
+Example:
 
-## Decision
+    # ADR-001: Use PostgreSQL for user data
 
-We will use PostgreSQL as our primary database.
+    ## Status
+    Accepted
 
-## Consequences
+    ## Context
+    We need transactional guarantees and relational queries.
 
-### Positive
-- Strong relational data support
-- ACID compliance
-- Wide ecosystem support
+    ## Decision
+    We will use PostgreSQL.
 
-### Negative
-- Requires more operational overhead than managed services
-- Need expertise for optimization
-```
+    ## Consequences
 
-## Best Practices
+    ### Positive
+    - Strong relational support
+    - Mature tooling
 
-### General Guidelines
+    ### Negative
+    - Requires operational maintenance
 
-1. **Be concise** - Get to the point quickly
-2. **Use active voice** - "Run the command" not "The command should be run"
-3. **Include examples** - Show, don't just tell
-4. **Keep it updated** - Stale docs are worse than no docs
-5. **Use consistent formatting** - Same style throughout
+Do not include:
+- Strategic alignment
+- Future-proofing
+- Industry best practice without evidence
 
-### File Organization
+---
 
-```text
-docs/
-├── README.md           # Overview and navigation
-├── getting-started.md  # Quick start guide
-├── architecture.md     # System architecture
-├── api/               # API documentation
-│   ├── README.md
-│   └── endpoints.md
-├── guides/            # How-to guides
-│   ├── deployment.md
-│   └── contributing.md
-└── adr/               # Architecture Decision Records
-    ├── 001-database.md
-    └── 002-framework.md
-```
+## Humanization Rules (Mandatory)
 
-### Writing for Developers
+### Prefer plain language
 
-1. **Start with the "why"** - Explain purpose before implementation
-2. **Include prerequisites** - What they need before starting
-3. **Provide copy-paste examples** - Working code snippets
-4. **Explain error cases** - Common problems and solutions
-5. **Link to related docs** - Don't repeat, reference
+Use:
+- is / are / has / does
+- Direct, concrete phrasing
 
-### Accessibility
+Avoid:
+- serves as
+- stands as
+- represents
+- abstract nouns like landscape, journey, tapestry
 
-1. **Use descriptive link text** - "See the guide" not "click here"
-2. **Add alt text to images** - Describe what the image shows
-3. **Use proper heading structure** - For screen readers
-4. **Ensure sufficient contrast** - In any diagrams
+---
 
-## Common Patterns
+### Avoid promotional tone
 
-### Collapsible Sections
+Bad:
 
-```markdown
-<details>
-<summary>Click to expand</summary>
+    A powerful and flexible solution designed to enhance productivity.
 
-Hidden content here.
+Better:
 
-</details>
-```
+    The tool batches requests and retries failures automatically.
 
-### Alerts/Callouts (GitHub)
+---
 
-```markdown
-> [!NOTE]
-> Important information users should know.
+### Avoid vague attribution
 
-> [!TIP]
-> Helpful advice for doing things better.
+Do not write:
+- “Experts believe…”
+- “Industry reports suggest…”
 
-> [!WARNING]
-> Critical content that could cause issues.
+Either cite a source or remove the claim.
 
-> [!CAUTION]
-> Negative potential consequences of an action.
-```
+---
 
-### Badges
+### Avoid formulaic sections
 
-```markdown
-![Build Status](https://github.com/org/repo/workflows/CI/badge.svg)
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Version](https://img.shields.io/npm/v/package.svg)
-```
+Avoid headings like:
+- Challenges and future outlook
+- Key takeaways
+- Final thoughts
+
+End documents when the useful information ends.
+
+---
+
+### Avoid AI-isms
+
+Do not use:
+- Excessive em dashes
+- Overuse of bold text
+- Emojis in headings or lists
+- Curly quotes
+- Chatbot phrases like “Let me know if…”
+
+---
+
+## Writing for Developers
+
+1. Start with why, then how
+2. Assume the reader is competent but busy
+3. Explain failure modes
+4. Link instead of repeating content
+5. Remove anything that does not help someone do the work
+
+---
+
+## Accessibility
+
+- Logical heading order
+- Descriptive link text
+- Meaningful alt text
+- No reliance on color alone
+
+---
+
+## Common Markdown Patterns
+
+### Collapsible sections
+
+Example:
+
+    <details>
+    <summary>Why retries are limited</summary>
+
+    Unlimited retries caused cascading failures during load testing.
+    </details>
+
+---
+
+### Callouts (GitHub)
+
+Example:
+
+    > [!NOTE]
+    > This migration is irreversible.
+
+    > [!WARNING]
+    > Running this script will delete existing data.
+
+Use sparingly and only when the callout adds clarity.
+
+---
+
+## Quality Bar Before Merging
+
+Before finalizing documentation, confirm:
+
+- Does this sound like a person explaining something they understand?
+- Would I trust this if I did not write it?
+- Can I remove 20% without losing meaning?
+- Are there sentences included only to sound good?
+
+If yes, rewrite.
+
+---
 
 ## References
 
-- [GitHub Markdown Guide](https://docs.github.com/en/get-started/writing-on-github)
-- [ISE Documentation Practices](https://microsoft.github.io/code-with-engineering-playbook/documentation/)
-- [Google Developer Documentation Style Guide](https://developers.google.com/style)
-- [Microsoft Writing Style Guide](https://learn.microsoft.com/style-guide/welcome/)
+- Microsoft Writing Style Guide  
+  https://learn.microsoft.com/style-guide/welcome/
+- ISE Engineering Playbook – Documentation  
+  https://microsoft.github.io/code-with-engineering-playbook/documentation/
+- GitHub Markdown Guide  
+  https://docs.github.com/en/get-started/writing-on-github
+- Wikipedia: Signs of AI Writing  
+  https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing
