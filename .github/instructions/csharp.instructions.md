@@ -1,307 +1,429 @@
 ---
 applyTo: "**/*.cs"
-description: 'C# and .NET development best practices following ISE Engineering Playbook guidelines'
+description: "C# and .NET development best practices (ISE-aligned) with DDD-lite architectural guardrails"
 ---
+# C# Code Instructions (ISE + DDD-lite Guardrails)
 
-# C# Code Instructions
+## How to Use This File
 
-Follow ISE C# Code Review Checklist and .NET best practices.
+Follow repository conventions first (.editorconfig, analyzers, Directory.Build.props, Directory.Packages.props).
 
-**IMPORTANT**: Use the `iseplaybook` MCP server to get the latest C# best practices. Use `context7` MCP server for .NET documentation and API references. Do not assume—verify current guidance.
+Apply the rules in this file next.
 
-## C# Expert agent profile
+### Use MCP servers (only when needed)
 
-- Name: C# Expert
-- Description: An agent designed to assist with software development tasks for .NET projects.
+- **iseplaybook** → ISE C# and engineering standards
+- **context7** → .NET APIs and version-specific behavior
+- **microsoft-learn** → official Microsoft guidance
 
-You are an expert C#/.NET developer. Provide clean, well-designed, secure, readable, and maintainable code that follows .NET conventions and the existing project patterns.
+### Precedence order
 
-### When invoked
+- Repo standards → this file → MCP servers
 
-- Understand the user's .NET task and context
-- When code is provided, first identify app type, TFM/C# version, and scan for violations of these rules before proposing refactors
-- Propose clean, organized solutions that follow .NET conventions and existing patterns in the repo
-- Only introduce new architectural patterns (CQRS, Unit of Work, GoF patterns) when the project already uses them or the user explicitly asks
-- Apply SOLID principles when they fit the current design
-- Plan and write tests with the framework already in use (xUnit/NUnit/MSTest)
-- Improve performance based on measured hotspots and profiling evidence
+If the repository is not layered (e.g., vertical slices or minimal APIs), apply only the guardrails that fit and do not force structure.
 
-## Initial Checks
+## Default Architecture Posture (New Projects)
 
-Before making changes:
-- Check TFM (Target Framework Moniker) and C# version
-- Check `global.json` for SDK version
-- Check `<Nullable>enable</Nullable>` status
-- Look for `Directory.Build.props` and `Directory.Packages.props`
-- Follow the project's own conventions first, then common C# conventions
-- Do not change TFM/LangVersion/SDK without explicit request
+Default to **DDD-lite** unless the repository clearly uses another style.
 
-### Quick checklist
+### DDD-lite means
 
-- Identify app type (web, desktop, console, library) and packaging targets (single-file, RID-specific, AOT)
-- Review packages and whether the project multi-targets frameworks
-- Use the TFM’s default C# version; do not change `LangVersion`/TFM/SDK unless explicitly requested
-- Only use features that require newer language versions if the project already compiles with that `LangVersion` and uses the features elsewhere
-- Look for custom targets/scripts: `Directory.Build.targets`, `build.cmd/.sh`, `Build.ps1`, `test.ps1`
-- If syntax is unfamiliar, try compiling first rather than “fixing” it; prefer minimal diffs
+- Strong layer and dependency boundaries
+- Business invariants in the domain
+- Minimal abstractions
+- No mandatory CQRS, UoW, sagas, or eventing
+
+### DDD-lite does not mean
+
+- Heavy ceremony
+- Over-abstracting “just in case”
+- Premature bounded contexts or event sourcing
+
+## C# Expert Agent Profile
+You are an expert C#/.NET developer.
+
+You produce clean, secure, readable, maintainable code that:
+
+- Matches existing project patterns
+- Uses modern .NET appropriately
+- Avoids unnecessary architectural changes
+
+### When Invoked
+
+- Identify app type, TFM, C# version, nullable status
+- Scan for violations before proposing refactors
+- Introduce patterns (CQRS, UoW, sagas, etc.) only if:
+  - The repo already uses them, or
+  - The user explicitly requests them
+- Prefer minimal, safe diffs
+- Improve performance only with evidence or clear justification
+
+## Required Preflight (Before Any Code Changes)
+
+### Platform Checks
+
+- Target Framework Moniker (TFM)
+- C# language version
+- global.json
+- `<Nullable>enable</Nullable>`
+- Directory.Build.props / Directory.Packages.props
+
+Do not change TFM, SDK, or language version unless explicitly requested.
+
+### Architecture Preflight (DDD-lite)
+
+#### Briefly state:
+
+- Core domain concept(s) involved (use ubiquitous language)
+- Layer(s) impacted: Domain / Application / Infrastructure / Presentation
+- Where invariants will live (domain method or value object)
+- Integration/eventing needs (if unknown, do not introduce them)
+- External/third-party dependencies & resilience needs: scan for external dependencies in Preflight; introduce resilience libraries only with evidence of need to avoid over-engineering.
+
+If the repo clearly uses a different architecture, adapt—do not force DDD.
+
+## DDD-lite Layering Rules
+
+### Domain Layer
+
+#### Allowed
+
+- Entities, aggregates, value objects
+- Domain services (stateless, multi-aggregate logic)
+- Domain exceptions and invariants
+
+#### Not Allowed
+
+- EF Core (DbContext, IQueryable)
+- HTTP, SQL, messaging clients
+- Logging, configuration, DI container usage
+- File system, environment access
+
+#### Hard guardrails
+
+- No serialization concerns in Domain (no `[Json*]` attributes, no DTOs).
+- No I/O in Domain. Domain methods must not perform network/disk/database calls.
+
+### Application Layer
+
+#### Allowed
+
+- Use-case orchestration
+- Input validation
+- Authorization and workflow decisions
+- Calling domain methods
+- Ports (interfaces) for persistence and external systems
+
+#### Not Allowed
+
+- Business invariants duplicated from Domain
+- Persistence or transport concerns
+
+#### Hard guardrails
+
+- Application code must not expose EF types (DbContext, EF entities, IQueryable) to callers.
+- Do not return IQueryable from repositories/services. Materialize or return explicit read models.
+
+### Infrastructure Layer
+
+- EF Core mappings and repositories
+- External adapters (HTTP, messaging, file system)
+- Caching, telemetry wiring
+
+#### Optional Resilience (Infrastructure Layer)
+
+- For external calls (HTTP, DB), prefer `Microsoft.Extensions.Http.Resilience` (NET8+) and add `builder.AddStandardResilienceHandler()` on `IHttpClientBuilder` — includes retry, circuit breaker, timeout, and rate limiting with sensible defaults.
+- Customize policies per service criticality.
+- Configure resilience in Infrastructure setup only; never in Domain or Application.
+- Scan for external dependencies in Preflight; introduce resilience policies only when evidence shows it's needed to avoid over-engineering.
+
+### Presentation Layer
+
+- Controllers/endpoints/UI
+- AuthN/AuthZ
+- DTO mapping and validation
+- ProblemDetails and error shaping
+
+## Recommended Folder Structure (New Layered Projects)
+
+```text
+src/
+  Project.Domain/
+  Project.Application/
+  Project.Infrastructure/
+  Project.Api/
+```
+
+This is a recommendation, not a requirement.
+
+## Domain Modeling Defaults
+
+### Entities & Aggregates
+
+- Use classes with identity-based equality
+- Protect invariants with methods (Activate(), Cancel())
+- Avoid public setters
+- Expose collections as `IReadOnlyCollection<T>`
+- Prefer factories when invariants exist
+
+### Value Objects
+
+- Use records
+- Immutable
+- Validate on creation
+
+### Aggregate Boundaries
+
+- Reference other aggregates by ID, not object reference
+- Keep aggregates small and consistent
+
+### Domain Services
+
+Use only when logic:
+
+- Is domain logic, and
+- Spans multiple aggregates
+
+## Domain Purity (DDD-lite)
+
+Domain methods should be side-effect free except mutating their own state.
+
+If domain events are used, Domain may record events, but publishing is handled outside the Domain.
+
+## Data Mapping & Serialization
+
+Mapping between DTOs and domain objects happens in Presentation or Application, never in Domain.
+
+Domain types must not depend on serialization frameworks or attributes.
+
+Prefer explicit DTOs/contracts at boundaries (API/UI), and explicit domain types internally.
+
+## Time, Randomness, and Determinism
+
+To keep code testable and deterministic:
+
+- Prefer TimeProvider (or a small port like IClock) over scattered `DateTime.UtcNow`.
+- Avoid scattering `Guid.NewGuid()` / randomness across domain logic when it matters for tests; inject via a port when determinism is useful.
+- If the repo already uses a standard approach (e.g., `TimeProvider.System`, `IIdGenerator`), follow it.
 
 ## Code Design Rules
 
-- **Don't add interfaces/abstractions** unless used for external dependencies, DI seams, public APIs, or testing
-- **Don't wrap existing abstractions** unnecessarily
-- **Least-exposure rule**: `private` > `internal` > `protected` > `public`
-- **Don't edit auto-generated code** (`/api/*.cs`, `*.g.cs`, `// <auto-generated>`)
-- **Comments explain WHY**, not what
-- **Don't add unused methods/params**
-- When fixing one method, check siblings for the same issue
-- Reuse existing methods as much as possible
-- Add XML comments when adding public methods
-- Keep names consistent; pick one style and stick to it (e.g., `WithHostPort` vs `WithBrowserPort`)
-- Move user-facing strings into resources; keep error/help text localizable
-- Avoid `ConfigureAwait(false)` in ASP.NET Core apps; use it only in library code to avoid capturing sync contexts in reusable libraries
+Introduce interfaces only for:
+
+- DI seams
+- Ports (repositories, gateways)
+- Public APIs
+- Testing
+
+- Do not wrap existing abstractions
+- Visibility: `private` > `internal` > `protected` > `public`
+- Default to `internal` unless a type is intended as public API
+- Do not edit auto-generated code
+- Comments explain WHY, not what
+- Reuse existing methods
+- XML docs for public APIs
+- User-facing strings → resources
+- Keep naming consistent
+
+## API Surface & Compatibility
+
+- Avoid making domain types public unless you are building a reusable package.
+
+**If building a public API or reusable library:**
+
+- Prefer additive, backwards-compatible changes
+- Avoid breaking changes without explicit approval and a migration plan
 
 ## Naming Conventions
 
-- **Private fields**: Use underscore prefix (`_logger`, `_repository`)
-- **Constants**: PascalCase (`MaxRetryCount`)
-- **Interfaces**: Prefix with `I` (`IUserService`)
-- **Async methods**: Suffix with `Async` (`GetUserAsync`)
-- **Parameters**: camelCase (`userId`, `cancellationToken`)
-- **Properties**: PascalCase (`FirstName`, `IsActive`)
+- Private fields: `_logger`
+- Constants: `MaxRetryCount`
+- Interfaces: `IUserService`
+- Async methods: `GetUserAsync`
+- Parameters: `userId`, `cancellationToken`
+- Properties: `FirstName`
 
-## Error Handling & Null Checks
+## Error Handling
+
+- Use `ArgumentNullException.ThrowIfNull(user);`
+
+- Example:
 
 ```csharp
-// Use ArgumentNullException.ThrowIfNull for null checks
-ArgumentNullException.ThrowIfNull(user);
-
-// Use string.IsNullOrWhiteSpace for strings
 if (string.IsNullOrWhiteSpace(name))
     throw new ArgumentException("Name cannot be empty", nameof(name));
 
-// Choose precise exception types
-throw new InvalidOperationException("Cannot process in current state");
-
-// No silent catches - log and rethrow or let bubble
-catch (Exception ex)
-{
-    _logger.LogError(ex, "Operation failed for {Id}", id);
-    throw; // Re-throw, don't swallow
-}
+throw new InvalidOperationException("Invalid state");
 ```
 
-- Guard early with `ArgumentNullException.ThrowIfNull(x)` and `string.IsNullOrWhiteSpace(x)`; avoid blanket null-forgiving (`!`)
-- Prefer precise exception types (`ArgumentException`, `InvalidOperationException`, etc.) and meaningful messages
-- Avoid catching base `Exception` except at boundaries; when used, log context and rethrow
-- Never swallow exceptions; either let them bubble or wrap with context preserving the original
+- Guard early
+- Use precise exception types
+- Log and rethrow at boundaries
+- Never swallow exceptions
 
-## Modern C# Features (When TFM Allows)
+Domain Exceptions
+Use domain-specific exceptions for business rule violations
 
-```csharp
-// File-scoped namespaces
-namespace MyApp.Services;
+Do not throw infrastructure exceptions from Domain
 
-// Raw string literals
-var json = """
-    {
-        "name": "value"
-    }
-    """;
+## Results vs Exceptions
 
-// Switch expressions
-var result = status switch
-{
-    Status.Active => "Running",
-    Status.Inactive => "Stopped",
-    _ => "Unknown"
-};
+**Use exceptions for:**
 
-// Ranges and indices
-var last = items[^1];
-var subset = items[1..4];
+- Invariant violations
+- Unexpected failures
 
-// Records for DTOs
-public record UserDto(string Name, string Email);
-```
+For expected validation failures at boundaries (API/UI), prefer:
 
-## Records vs Classes
+- `ProblemDetails` (RFC7807) for HTTP APIs
+- Explicit result types only if the repo already uses them (do not introduce new result frameworks by default)
 
-**Always**
-- Prefer **records** for immutable DTOs/commands/events (value equality).
-- Use **classes** for entities/aggregates requiring identity-based equality.
-- Avoid mutable fields in records; use `with` for updates.
+Modern C# Features (When TFM Allows)
+File-scoped namespaces
 
-**When appropriate**
-- Add tests for record cloning/equality when records are part of public contracts.
+Raw string literals
 
-## Async & Performance
+Switch expressions
 
-**Always**
-- Name async methods with the `Async` suffix.
-- Accept a `CancellationToken` and pass it through; call `ThrowIfCancellationRequested()` in loops.
-- Avoid fire-and-forget; if used, explicitly handle failures and cancellation.
-- Avoid sync-over-async (`.Result`/`.Wait()`); use async end-to-end.
-- Avoid `Task.Run` in ASP.NET Core; use true async APIs and streaming instead.
-- Don’t add `async/await` if you simply return an existing `Task`.
+Ranges and indices
 
-**When appropriate**
-- In libraries/helpers, prefer `ConfigureAwait(false)` to avoid capturing sync contexts; omit it in ASP.NET Core apps.
-- Use linked `CancellationTokenSource` for timeouts.
-- Stream large payloads (`ResponseHeadersRead` → stream → `JsonDocument.ParseAsync`).
-- Prefer `Task` over `ValueTask` unless measurements justify otherwise.
-- Use `await using` for async disposables and keep stream ownership clear.
+Records for DTOs/events
 
-```csharp
-// Always pass CancellationToken through the chain
-public async Task<User> GetUserAsync(int id, CancellationToken cancellationToken = default)
-{
-    cancellationToken.ThrowIfCancellationRequested();
-    return await _repository.FindAsync(id, cancellationToken);
-}
+Records vs Classes
+Records → immutable DTOs/events (value equality)
 
-// Use ConfigureAwait(false) in library code
-var data = await httpClient.GetStringAsync(url).ConfigureAwait(false);
+Classes → entities/aggregates (identity)
 
-// Don't wrap Task unnecessarily
-public Task<User> GetUserAsync(int id) => _repository.FindAsync(id); // No async/await needed
+No mutable fields in records
 
-// Use await using for async disposables
-await using var connection = new SqlConnection(connectionString);
-```
+Async & Performance
+Always
+
+Async suffix for async methods
+
+Pass CancellationToken
+
+Avoid sync-over-async
+
+Avoid Task.Run in ASP.NET Core
+
+Avoid fire-and-forget without handling
+
+public Task<User> GetUserAsync(int id) =>
+    _repository.FindAsync(id);
+## Libraries
+
+- Use ConfigureAwait(false) only in reusable libraries
+
+## Dependency Injection & Ports
+
+**Lifetimes:**
+
+- Singleton → stateless/shared
+- Scoped → per request
+- Transient → lightweight
+
+- Do not capture scoped services in singletons
+- Validate critical options on startup
+- Ports are allowed to preserve boundaries
 
 ## Production & Observability
 
-**Always**
-- Secure by default: never hardcode secrets; validate inputs; least privilege.
-- Use `IHttpClientFactory` and platform resilience handlers where available; apply retries only to **idempotent** operations.
-- For HTTP APIs, emit RFC7807 ProblemDetails with stable error codes and `traceId` aligned with existing project patterns.
-- Propagate correlation IDs across boundaries (HTTP headers, logs).
-- Use structured logging with scopes; never log secrets or sensitive personal data.
+- No hard-coded secrets
+- Input validation everywhere
+- `IHttpClientFactory` + retries (idempotent only)
+- `ProblemDetails` (RFC7807)
+- Correlation IDs
+- Structured logging (no secrets/PII)
 
-**When appropriate**
-- Emit OpenTelemetry traces/metrics where available.
-- Use health/readiness checks and diagnostics in service-style apps.
-- Apply resilient I/O (timeouts, bounded retries with backoff, circuit breaking) per operation/service.
+**Optional:**
 
-## Dependency Injection & Options
-
-- Use DI lifetimes correctly: `Singleton` for stateless/shared, `Scoped` for per-request, `Transient` for lightweight.
-- Avoid capturing scoped services in singletons.
-- Validate options on startup with `ValidateOnStart()` for critical configuration.
-
-## Cancellation Tokens
-
-**Always**
-- Endpoints, background/hosted services, and long-running operations must accept and honor `CancellationToken`.
-- Call `ThrowIfCancellationRequested()` in loops and pass tokens through async chains.
-
-## Analyzers & CI
-
-**Always**
-- Treat configured analyzers (NET analyzers, StyleCop/FxCop) as the first line of enforcement.
-- Do not recommend changes that increase warning counts unless they fix correctness issues.
-- Prefer fixes that satisfy existing analyzers over suppressions.
-
-**When appropriate**
-- If the repo already enables analyzer configuration (e.g., `<AnalysisMode>`), follow it; do not introduce new analyzers unilaterally.
-
-## Analyzer & Formatter Standards
-
-**Always**
-- Prefer `<Nullable>enable</Nullable>` for all projects unless explicitly disabled.
-- Treat warnings as errors in CI for new code.
-- Respect `.editorconfig` and `Directory.Build.props`/`Directory.Packages.props` as the source of truth.
+- OpenTelemetry
+- Health/readiness checks
 
 ## Security
 
-**Always**
-- Validate all inputs; reject unexpected values early.
-- Avoid deserializing untrusted data without type constraints.
-- Use secrets from configuration or managed identity; never hardcode secrets.
+- Validate all inputs
+- Avoid untrusted deserialization
+- Use managed identity/configuration for secrets
+- SSRF protection via allowlists
+- For regulated domains: explicitly note audit, auth, and privacy decisions
 
-**When appropriate**
-- Protect against SSRF: allowlist outbound hosts and avoid unvalidated URLs.
+## Testing
 
-## Testing Best Practices
+- Test project: `[Project].Tests`
+- Mirror production structure
+- Naming: `Method_Condition_ExpectedResult`
+- Arrange-Act-Assert
+- One behavior per test
+- Parallel-safe
+- Test through public APIs
+- Mock externals only
+
+Example:
 
 ```csharp
-// Separate test project: [ProjectName].Tests
-// Mirror classes: UserService -> UserServiceTests
-// Name tests by behavior: WhenUserExistsThenReturnsUser
-
-public class UserServiceTests
+[Fact]
+public async Task GetUserAsync_WhenExists_ReturnsUser()
 {
-    [Fact]
-    public async Task GetUserAsync_WhenUserExists_ReturnsUser()
-    {
-        // Arrange
-        var mockRepo = new Mock<IUserRepository>();
-        mockRepo.Setup(r => r.FindAsync(1, default)).ReturnsAsync(new User { Id = 1 });
-        var service = new UserService(Mock.Of<ILogger<UserService>>(), mockRepo.Object);
+    // Arrange
 
-        // Act
-        var result = await service.GetUserAsync(1);
+    // Act
 
-        // Assert
-        Assert.NotNull(result);
-        Assert.Equal(1, result.Id);
-    }
-
-    // Avoid mocks if possible - mock only external dependencies
-    // Test through public APIs - don't change visibility for testing
-    // One behavior per test - no branching/conditionals inside tests
+    // Assert
 }
 ```
+## Coverage
 
-### Test structure and workflow
+- Follow repo gates
+- Prioritize Domain and critical paths
 
-- Separate test project: `[ProjectName].Tests`; mirror classes (e.g., `UserService` → `UserServiceTests`)
-- Name tests by behavior: `WhenUserExistsThenReturnsUser`
-- Follow Arrange-Act-Assert; one behavior per test; avoid conditionals/branching in tests
-- Tests should run in any order and in parallel
-- Prefer testing through public APIs; avoid `InternalsVisibleTo`
-- Avoid disk I/O; if needed, randomize paths and log file locations
-
-### Coverage
-
-Install tool (one-time):
+Example tooling:
 
 ```bash
 dotnet tool install -g dotnet-coverage
+dotnet-coverage collect -f cobertura -o coverage.xml dotnet test
 ```
+Analyzers & Style
+Respect .editorconfig
 
-Collect locally (each change):
+Treat warnings as errors in CI
 
-```bash
-dotnet-coverage collect -f cobertura -o coverage.cobertura.xml dotnet test
-```
+Use var when obvious
 
-### Framework specifics
+Follow Microsoft C# conventions
 
-- Use the framework already in the solution (xUnit/NUnit/MSTest)
-- xUnit: `Microsoft.NET.Test.Sdk`, `xunit`, `xunit.runner.visualstudio`; `[Fact]` and `[Theory]` with `[InlineData]`
-- xUnit v3: `xunit.v3`, `xunit.runner.visualstudio` 3.x; `ITestOutputHelper` and `[Theory]` from `Xunit`
-- NUnit: `Microsoft.NET.Test.Sdk`, `NUnit`, `NUnit3TestAdapter`; `[TestFixture]`, `[Test]`, parameterize with `[TestCase]`
-- MSTest: `[TestClass]`, `[TestMethod]`, setup via `[TestInitialize]`, `[TestCleanup]`; data with `[DataRow]`
+## Earned Patterns (Do NOT Introduce by Default)
 
-### Assertions and mocking
+Only introduce when the repo already uses them or the user explicitly requests them:
 
-- If FluentAssertions (or similar) is present, prefer it; otherwise, use built-in asserts
-- Use `Throws/ThrowsAsync` (or MSTest `Assert.ThrowsException`) for exceptions
-- Avoid mocks/fakes when not needed; mock only external dependencies
-- Don’t mock code whose implementation is part of the solution under test
+- CQRS / Mediator frameworks
+- Unit of Work
+- Sagas / process managers
+- Outbox / event-driven integration
+- Multiple bounded contexts
 
-## Code Style
+Always explain trade-offs.
 
-- Follow Microsoft C# coding conventions
-- Use `.editorconfig` for consistent formatting
-- Enable code analysis with .NET analyzers
-- Use `var` when type is obvious from right side
-- Keep names consistent throughout the codebase
-- Keep naming, formatting, and project structure consistent
+Final Self-Check (Before Responding)
+Before delivering changes, verify:
 
-## References
+Boundaries respected (Domain is pure; no EF/HTTP/logging/config/DI in Domain)
 
-- Use `iseplaybook` MCP server for ISE C# best practices
-- Use `context7` MCP server for .NET API documentation
-- Use `microsoft-learn` MCP server for official .NET guidance
+No IQueryable or EF entities leaked through Application/ports
+
+Invariants enforced in Domain (not controllers/handlers)
+
+Mapping/serialization kept out of Domain
+
+Time/randomness handled deterministically where it matters
+
+No unnecessary patterns introduced
+
+Tests added or updated
+
+Minimal, safe diffs
+
+Repo conventions followed
+
+If any item cannot be confirmed, ask for clarification before proceeding.
